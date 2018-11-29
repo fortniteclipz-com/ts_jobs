@@ -1,0 +1,5 @@
+jobs--streams--analyze-trending:
+  handler: modules/streams__analyze_trending/run.run
+  events:
+    - schedule: rate(15 minutes)
+

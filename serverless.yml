@@ -1,0 +1,37 @@
+service: ts-jobs
+
+provider:
+  name: aws
+  profile: serverless-admin
+  region: ${self:custom.config.region}
+  runtime: python3.6
+  stage: ${self:custom.config.stage}
+  versionFunctions: false
+  environment:
+    ts_env: ${self:custom.config.stage}
+
+  iamRoleStatements:
+    ${self:custom.config.iam.role-statement}
+  memorySize: 128
+  timeout: 30
+
+package:
+  exclude:
+    - '*/**'
+  include:
+    - modules/**/run.py
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  config: ${file(../ts_shared/ts_config/ts_config/ts_config_${opt:stage, 'dev'}.yml)}
+  pythonRequirements:
+    dockerizePip: non-linux
+    dockerSsh: true
+    pipCmdExtraArgs:
+      - --process-dependency-links
+    slim: true
+
+functions:
+  - ${file(./config/jobs.yml)}
