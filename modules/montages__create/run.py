@@ -1,6 +1,5 @@
 import ts_aws.rds
 import ts_aws.rds.stream_moment
-import ts_config
 import ts_logger
 import ts_model.Montage
 import ts_model.Status
