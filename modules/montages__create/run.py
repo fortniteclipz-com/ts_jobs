@@ -1,4 +1,5 @@
 import ts_aws.rds
+import ts_aws.rds.stream_moment
 import ts_config
 import ts_logger
 import ts_model.Montage
@@ -13,25 +14,24 @@ def run(event, context):
     try:
         logger.info("start", event=event, context=context)
 
-        session = ts_aws.rds.get_session()
-        query = session \
-            .query(ts_model.Stream) \
-            .outerjoin(ts_model.Montage, ts_model.Montage.stream_id == ts_model.Stream.stream_id) \
-            .filter(
-                ts_model.Montage.stream_id == None,
-                ts_model.Stream._status_analyze == ts_model.Status.DONE,
-            ) \
-            .limit(5)
+        with ts_aws.rds.get_session() as session:
+            query = session \
+                .query(ts_model.Stream) \
+                .outerjoin(ts_model.Montage, ts_model.Montage.stream_id == ts_model.Stream.stream_id) \
+                .filter(
+                    ts_model.Montage.stream_id == None,
+                    ts_model.Stream._status_analyze == ts_model.Status.DONE,
+                ) \
+                .order_by(ts_model.Stream._date_created) \
+                .limit(3)
+            logger.info("query", query=ts_aws.rds.print_query(query))
+            streams = query.all()
 
-        logger.info("query", query=ts_aws.rds.print_query(query))
-        streams = query.all()
         logger.info("streams", streams_length=len(streams))
-
         for s in streams:
-            logger.info("stream", s=s)
-
-
-
+            logger.info("stream", stream=s)
+            stream_moments = ts_aws.rds.stream_moment.get_stream_moments(s)
+            print(stream_moments)
 
         logger.info("success")
         return True

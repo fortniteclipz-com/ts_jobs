@@ -28,23 +28,25 @@ def run(event, context):
         video_ids = list(map(lambda v: v['id'], videos))
         logger.info("video_ids", video_ids=video_ids)
 
-        session = ts_aws.rds.get_session()
-        query = session \
-            .query(ts_model.Stream) \
-            .filter(
-                ts_model.Stream.stream_id.in_(video_ids),
-            )
-        logger.info("query", query=ts_aws.rds.print_query(query))
-        streams = query.all()
+        with ts_aws.rds.get_session() as session:
+            query = session \
+                .query(ts_model.Stream) \
+                .filter(
+                    ts_model.Stream.stream_id.in_(video_ids),
+                )
+            logger.info("query", query=ts_aws.rds.print_query(query))
+            streams = query.all()
+
         stream_ids = list(map(lambda s: s['stream_id'], streams))
         logger.info("stream_ids", stream_ids=stream_ids)
 
-        for v_id in video_ids:
-            if v_id in stream_ids:
+        for v in videos:
+            logger.info("video", video=v)
+            if v['id'] in stream_ids and v['user_name'].lower() is not 'fortnite':
                 continue
-            logger.info("video_id", video_id=v_id)
+
             stream = ts_model.Stream(
-                stream_id=v_id,
+                stream_id=v['id'],
                 game='fortnite',
                 _status_analyze=ts_model.Status.WORKING,
             )
@@ -52,6 +54,7 @@ def run(event, context):
             ts_aws.sqs.stream__analyze.send_message({
                 'stream_id': stream.stream_id,
             })
+
             break
 
         logger.info("success")
