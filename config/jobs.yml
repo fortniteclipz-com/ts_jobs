@@ -1,5 +1,10 @@
-jobs--streams--analyze-trending:
-  handler: modules/streams__analyze_trending/run.run
+jobs--montages--create:
+  handler: modules/montages__create/run.run
+  events:
+    - schedule: rate(10 minutes)
+
+jobs--streams--analyze:
+  handler: modules/streams__analyze/run.run
   events:
     - schedule: rate(15 minutes)
 
