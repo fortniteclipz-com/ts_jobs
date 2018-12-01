@@ -40,48 +40,47 @@ def run(event, context):
         logger.info("streams", streams_length=len(streams))
         for s in streams:
             logger.info("stream", stream=s)
-            stream_moments = ts_aws.rds.stream_moment.get_stream_moments(s)
-            if len(stream_moments) == 0:
-                continue
-
             montage_id = f"m-{shortuuid.uuid()}"
             clips = []
             montage_clips = []
             montage_duration = 0
             clip_moments = []
-            for sm in stream_moments:
+            stream_moments = ts_aws.rds.stream_moment.get_stream_moments(s)
+            for i, sm in enumerate(stream_moments):
                 if len(clip_moments) == 0 or (sm.time - clip_moments[len(clip_moments) - 1].time <= 5):
                     clip_moments.append(sm)
-                else:
-                    time_in = clip_moments[0].time - 4;
-                    if time_in < 0:
-                        time_in = 0
-                    time_out = clip_moments[len(clip_moments) - 1].time + 1
-                    if time_out > s.duration:
-                        time_out = s.duration
+                    if i != len(stream_moments) - 1:
+                        continue
 
-                    clip_id = f"c-{shortuuid.uuid()}"
-                    clips.append(
-                        ts_model.Clip(
-                            clip_id=clip_id,
-                            user_id='system',
-                            stream_id=s.stream_id,
-                            time_in=time_in,
-                            time_out=time_out,
-                        )
-                    )
-                    montage_clips.append(
-                        ts_model.MontageClip(
-                            montage_id=montage_id,
-                            clip_id=clip_id,
-                            clip_order=len(clips),
-                        )
-                    )
+                time_in = clip_moments[0].time - 4;
+                if time_in < 0:
+                    time_in = 0
+                time_out = clip_moments[len(clip_moments) - 1].time + 1
+                if time_out > s.duration:
+                    time_out = s.duration
 
-                    montage_duration += time_out - time_in
-                    clip_moments = []
-                    if len(clips) == 50:
-                        break
+                clip_id = f"c-{shortuuid.uuid()}"
+                clips.append(
+                    ts_model.Clip(
+                        clip_id=clip_id,
+                        user_id='system',
+                        stream_id=s.stream_id,
+                        time_in=time_in,
+                        time_out=time_out,
+                    )
+                )
+                montage_clips.append(
+                    ts_model.MontageClip(
+                        montage_id=montage_id,
+                        clip_id=clip_id,
+                        clip_order=len(clips),
+                    )
+                )
+
+                montage_duration += time_out - time_in
+                clip_moments = [sm]
+                if len(clips) == 50:
+                    break
 
             montage = ts_model.Montage(
                 montage_id=montage_id,
