@@ -41,7 +41,7 @@ def run(event, context):
 
         for v in videos:
             logger.info("video", video=v)
-            if v['id'] in stream_ids and v['user_name'].lower() is not 'fortnite':
+            if v['id'] in stream_ids or v['user_id'] == '55125740':
                 continue
 
             stream = ts_model.Stream(
