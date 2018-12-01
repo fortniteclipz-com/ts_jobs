@@ -2,12 +2,12 @@ jobs--montages--create:
   handler: modules/montages__create/run.run
   events:
     - schedule:
-      - rate: rate(10 minutes)
-      - enabled: false
+        rate: rate(10 minutes)
+        enabled: false
 
 jobs--streams--analyze:
   handler: modules/streams__analyze/run.run
   events:
     - schedule:
-      - rate: rate(15 minutes)
+        rate: rate(15 minutes)
 
