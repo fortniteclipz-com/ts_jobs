@@ -2,7 +2,7 @@ jobs--montages--create:
   handler: modules/montages__create/run.run
   events:
     - schedule:
-        rate: rate(30 minutes)
+        rate: rate(1 hour)
 
 jobs--streams--analyze:
   handler: modules/streams__analyze/run.run
