@@ -2,11 +2,11 @@ jobs--montages--create:
   handler: modules/montages__create/run.run
   events:
     - schedule:
-        rate: cron(0 16 * * ? *)
+        rate: cron(0 7 * * ? *)
 
 jobs--streams--analyze:
   handler: modules/streams__analyze/run.run
   events:
     - schedule:
-        rate: cron(0 15 * * ? *)
+        rate: cron(0 6 * * ? *)
 
