@@ -1,4 +1,6 @@
 service: ts-jobs
+tenant: fortniteclipz
+app: fortniteclipz
 
 provider:
   name: aws
